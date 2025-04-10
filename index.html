@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Rastreador com Endereço</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+  />
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f7fa;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    #map {
+      height: 400px;
+      width: 100%;
+      margin-top: 20px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      margin: 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #location, #history {
+      margin-top: 10px;
+      font-size: 16px;
+      color: #444;
+      white-space: pre-wrap;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rastreador com Endereço Completo</h1>
+  <button onclick="startTracking()">Iniciar Rastreio</button>
+  <button onclick="stopTracking()">Parar Rastreio</button>
+  <button onclick="showHistory()">Ver Histórico</button>
+  <button onclick="clearHistory()">Limpar Histórico</button>
+  <p id="location">Localização não iniciada.</p>
+  <div id="map"></div>
+  <h3>Histórico:</h3>
+  <div id="history">Nenhum dado ainda.</div>
+
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script>
+    let map;
+    let marker;
+    let watchId;
+    let locations = JSON.parse(localStorage.getItem("locationHistory") || "[]");
+
+    function startTracking() {
+      if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition(async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const time = new Date().toLocaleString();
+
+          const address = await getAddress(lat, lng);
+
+          const locationText = 
+            `Latitude: ${lat.toFixed(5)}, Longitude: ${lng.toFixed(5)}\n${address} — ${time}`;
+          document.getElementById("location").innerText = locationText;
+
+          const entry = { lat, lng, address, time };
+          locations.push(entry);
+          localStorage.setItem("locationHistory", JSON.stringify(locations));
+
+          if (!map) {
+            map = L.map('map').setView([lat, lng], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '© OpenStreetMap',
+            }).addTo(map);
+            marker = L.marker([lat, lng]).addTo(map)
+              .bindPopup("Você está aqui").openPopup();
+          } else {
+            marker.setLatLng([lat, lng]);
+            map.setView([lat, lng]);
+          }
+        }, (error) => {
+          alert("Erro ao acessar localização: " + error.message);
+        });
+      } else {
+        alert("Seu navegador não suporta geolocalização.");
+      }
+    }
+
+    function stopTracking() {
+      if (watchId) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+        document.getElementById("location").innerText = "Rastreamento parado.";
+      }
+    }
+
+    function showHistory() {
+      const historyEl = document.getElementById("history");
+      if (locations.length === 0) {
+        historyEl.innerText = "Nenhum dado salvo.";
+        return;
+      }
+      historyEl.innerText = locations.map(loc =>
+        `Lat: ${loc.lat.toFixed(5)}, Lng: ${loc.lng.toFixed(5)}\n${loc.address} — ${loc.time}`
+      ).join("\n\n");
+    }
+
+    function clearHistory() {
+      localStorage.removeItem("locationHistory");
+      locations = [];
+      document.getElementById("history").innerText = "Histórico apagado.";
+    }
+
+    async function getAddress(lat, lng) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+          headers: {
+            'User-Agent': 'rastreador-teste'
+          }
+        });
+        const data = await res.json();
+        return data.display_name || "Endereço não encontrado";
+      } catch (e) {
+        return "Erro ao buscar endereço";
+      }
+    }
+  </script>
+</body>
+</html>
