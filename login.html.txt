@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Portal de Vídeos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="text-center">
+                <h1>Login - Portal de Vídeos</h1>
+                <p>Digite suas credenciais para acessar o conteúdo de vídeo</p>
+            </div>
+            
+            <div id="error-message" class="error-message"></div>
+            
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="button full-width">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se já está autenticado
+            const session = checkAuth();
+            if (session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Configurar formulário de login
+            document.getElementById('login-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const errorMessage = document.getElementById('error-message');
+                
+                // Limpar mensagem de erro anterior
+                errorMessage.textContent = '';
+                
+                // Tentar login
+                const result = login(username, password);
+                
+                if (result.error) {
+                    errorMessage.textContent = result.error;
+                } else {
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

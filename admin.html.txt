@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Portal de Vídeos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <header>
+            <div class="container">
+                <h1>Painel Admin</h1>
+                <div class="user-info">
+                    <a href="index.html" class="back-link">Voltar ao Portal</a>
+                </div>
+            </div>
+        </header>
+        <main>
+            <div class="container">
+                <div class="admin-header">
+                    <h2>Gerenciamento de Usuários</h2>
+                    <p>Gerencie o acesso dos usuários e datas de expiração</p>
+                    <button id="add-user-button" class="button">Adicionar Novo Usuário</button>
+                </div>
+                
+                <div class="table-container">
+                    <table id="users-table">
+                        <thead>
+                            <tr>
+                                <th>Usuário</th>
+                                <th>Data de Expiração</th>
+                                <th>Status</th>
+                                <th>Admin</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Usuários serão adicionados aqui via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para adicionar usuário -->
+    <div id="add-user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Adicionar Novo Usuário</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <form id="add-user-form">
+                <div class="form-group">
+                    <label for="new-username">Usuário</label>
+                    <input type="text" id="new-username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="new-password">Senha</label>
+                    <input type="password" id="new-password" name="password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="expires-at">Data de Expiração</label>
+                    <input type="date" id="expires-at" name="expiresAt" required>
+                </div>
+                
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="is-admin" name="isAdmin">
+                    <label for="is-admin">Usuário Admin</label>
+                </div>
+                
+                <button type="submit" class="button full-width">Adicionar Usuário</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

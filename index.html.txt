@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Vídeos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <header>
+            <div class="container">
+                <h1>Portal de Vídeos</h1>
+                <div class="user-info">
+                    <span id="expiration-info"></span>
+                    <button id="admin-button" class="button outline">Painel Admin</button>
+                    <button id="logout-button" class="button ghost">Sair</button>
+                </div>
+            </div>
+        </header>
+        <main>
+            <div class="container">
+                <iframe id="video-frame" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </main>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        // Verificar autenticação
+        document.addEventListener('DOMContentLoaded', function() {
+            const session = checkAuth();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Verificar se o acesso expirou
+            if (session.expiresAt && new Date(session.expiresAt) < new Date()) {
+                window.location.href = 'expired.html';
+                return;
+            }
+
+            // Configurar iframe com o site de vídeos
+            const videoFrame = document.getElementById('video-frame');
+            videoFrame.src = localStorage.getItem('videoSiteUrl') || 'https://seu-site-de-videos.com';
+
+            // Mostrar informações do usuário
+            const expirationInfo = document.getElementById('expiration-info');
+            const adminButton = document.getElementById('admin-button');
+            
+            if (session.isAdmin) {
+                expirationInfo.style.display = 'none';
+                adminButton.style.display = 'inline-block';
+                adminButton.addEventListener('click', function() {
+                    window.location.href = 'admin.html';
+                });
+            } else {
+                expirationInfo.textContent = 'Acesso expira em: ' + new Date(session.expiresAt).toLocaleDateString();
+                adminButton.style.display = 'none';
+            }
+
+            // Configurar botão de logout
+            document.getElementById('logout-button').addEventListener('click', function() {
+                logout();
+                window.location.href = 'login.html';
+            });
+        });
+    </script>
+</body>
+</html>
